@@ -6,41 +6,51 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/medicamentos")
+@RequestMapping("/api")
 public class MedicamentoController {
-    
+
     @Autowired
     private MedicamentoService medicamentoService;
-    
-    @GetMapping
-    public List<Medicamento> findAll() {
-        return medicamentoService.findAll();
+
+    // Lista medicamentos de uma agenda
+    @GetMapping("/agenda/{agendaId}/medicamentos")
+    public List<Medicamento> findByAgenda(@PathVariable Long agendaId) {
+        return medicamentoService.findByAgendaId(agendaId);
     }
-    
-    @GetMapping("/{id}")
+
+    @GetMapping("/medicamentos/{id}")
     public ResponseEntity<Medicamento> findById(@PathVariable Long id) {
-        Optional<Medicamento> medicamento = medicamentoService.findById(id);
-        return medicamento.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        return medicamentoService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
-    
-    @PostMapping
-    public Medicamento create(@RequestBody Medicamento medicamento) {
-        return medicamentoService.save(medicamento);
-    }
-    
-    @PutMapping("/{id}")
-    public ResponseEntity<Medicamento> update(@PathVariable Long id, @RequestBody Medicamento medicamento) {
-        if (medicamentoService.findById(id).isPresent()) {
-            medicamento.setId(id);
-            return ResponseEntity.ok(medicamentoService.save(medicamento));
+
+    // Cria medicamento vinculado a uma agenda
+    @PostMapping("/agenda/{agendaId}/medicamentos")
+    public ResponseEntity<?> create(@PathVariable Long agendaId, @RequestBody Medicamento medicamento) {
+        try {
+            return ResponseEntity.ok(medicamentoService.save(medicamento, agendaId));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return ResponseEntity.notFound().build();
     }
-    
-    @DeleteMapping("/{id}")
+
+    @PutMapping("/medicamentos/{id}")
+    public ResponseEntity<Medicamento> update(@PathVariable Long id, @RequestBody Medicamento medicamento) {
+        return medicamentoService.findById(id).map(existing -> {
+            medicamento.setId(id);
+            medicamento.setAgenda(existing.getAgenda());
+            medicamento.setDataCadastro(existing.getDataCadastro());
+            if (medicamento.getStatusMedicamento() == null) {
+                medicamento.setStatusMedicamento(existing.getStatusMedicamento());
+            }
+            return ResponseEntity.ok(medicamentoService.save(medicamento));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/medicamentos/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         if (medicamentoService.findById(id).isPresent()) {
             medicamentoService.deleteById(id);

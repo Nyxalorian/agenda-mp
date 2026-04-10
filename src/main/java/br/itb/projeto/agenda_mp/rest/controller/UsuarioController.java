@@ -95,30 +95,39 @@ public class UsuarioController {
     }
     
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        if (usuarioService.findById(id).isPresent()) {
-            usuarioService.deleteById(id);
+    public ResponseEntity<?> delete(@PathVariable Long id, @RequestBody(required = false) java.util.Map<String, String> body) {
+        String senhaAtual = body != null ? body.get("senhaAtual") : null;
+
+        if (senhaAtual == null || senhaAtual.isBlank()) {
+            return ResponseEntity.badRequest().body("Senha obrigatória para excluir a conta");
+        }
+
+        boolean excluido = usuarioService.deleteComValidacao(id, senhaAtual);
+        if (excluido) {
             return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Senha incorreta ou usuário não encontrado");
     }
     
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestParam String email, @RequestParam String senha) {
+    public ResponseEntity<?> login(@RequestBody Usuario _usuario) {
         try {
-            System.out.println("Tentativa de login para email: " + email);
+            System.out.println("Tentativa de login para email: " + _usuario.getEmail());
+
+           
             
-            if (email == null || email.trim().isEmpty() || senha == null || senha.trim().isEmpty()) {
+            if (_usuario.getEmail() == null || _usuario.getEmail().trim().isEmpty() || _usuario.getSenha() == null || _usuario.getSenha() .trim().isEmpty()) {
                 return ResponseEntity.badRequest().body("Email e senha são obrigatórios");
             }
             
-            Optional<Usuario> usuario = usuarioService.login(email.trim(), senha);
+             // Busncar no banco (Service)
+            Optional<Usuario> usuario = usuarioService.login(_usuario.getEmail().trim(), _usuario.getSenha() );
             
             if (usuario.isPresent()) {
-                System.out.println("Login bem-sucedido para: " + email);
+                System.out.println("Login bem-sucedido para: " + _usuario.getEmail());
                 return ResponseEntity.ok(usuario.get());
             } else {
-                System.out.println("Usuário não encontrado para email: " + email);
+                System.out.println("Usuário não encontrado para email: " + _usuario.getEmail());
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário não encontrado ou senha incorreta");
             }
         } catch (Exception e) {
