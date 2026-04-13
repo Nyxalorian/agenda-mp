@@ -33,12 +33,12 @@ public class Historico {
     @Column(nullable = false, length = 20, columnDefinition = "VARCHAR(20) DEFAULT 'PENDENTE'")
     private String status = "PENDENTE";
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "medicamento_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Medicamento medicamento;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "agenda_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Agenda agenda;
