@@ -1,5 +1,6 @@
 package br.itb.projeto.agenda_mp.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 @Entity
@@ -23,6 +24,7 @@ public class Usuario {
     private String email;
     
     @Column(nullable = false, length = 100)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String senha;
     
     public Usuario() {}

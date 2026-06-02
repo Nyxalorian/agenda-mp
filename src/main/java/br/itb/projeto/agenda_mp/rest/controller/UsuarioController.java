@@ -86,11 +86,9 @@ public class UsuarioController {
     
     @PutMapping("/{id}")
     public ResponseEntity<Usuario> update(@PathVariable Long id, @RequestBody Usuario usuario) {
-        if (usuarioService.findById(id).isPresent()) {
-            usuario.setId(id);
-            return ResponseEntity.ok(usuarioService.save(usuario));
-        }
-        return ResponseEntity.notFound().build();
+        return usuarioService.update(id, usuario)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
     
     @DeleteMapping("/{id}")

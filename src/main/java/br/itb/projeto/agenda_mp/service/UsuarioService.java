@@ -6,13 +6,18 @@ import br.itb.projeto.agenda_mp.model.repository.HistoricoRepository;
 import br.itb.projeto.agenda_mp.model.repository.MedicamentoRepository;
 import br.itb.projeto.agenda_mp.model.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class UsuarioService {
+
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -29,10 +34,10 @@ public class UsuarioService {
     public List<Usuario> findAll() {
         try {
             List<Usuario> usuarios = usuarioRepository.findAll();
-            System.out.println("Encontrados " + usuarios.size() + " usuários no banco");
+            System.out.println("Encontrados " + usuarios.size() + " usuarios no banco");
             return usuarios;
         } catch (Exception e) {
-            System.err.println("Erro ao buscar todos os usuários: " + e.getMessage());
+            System.err.println("Erro ao buscar todos os usuarios: " + e.getMessage());
             e.printStackTrace();
             throw e;
         }
@@ -43,31 +48,44 @@ public class UsuarioService {
     }
 
     public Usuario save(Usuario usuario) {
+        if (usuario.getSenha() != null && !usuario.getSenha().isBlank() && !isSenhaComHash(usuario.getSenha())) {
+            usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
+        }
         return usuarioRepository.save(usuario);
     }
 
-    // Exclui usuário respeitando a ordem das FKs: Historico -> Medicamento -> Agenda -> Usuario
+    public Optional<Usuario> update(Long id, Usuario dadosAtualizados) {
+        return usuarioRepository.findById(id).map(usuario -> {
+            usuario.setNome(dadosAtualizados.getNome());
+            usuario.setEmail(dadosAtualizados.getEmail());
+            usuario.setIdade(dadosAtualizados.getIdade());
+            usuario.setComorbidade(dadosAtualizados.getComorbidade());
+
+            if (dadosAtualizados.getSenha() != null && !dadosAtualizados.getSenha().isBlank()) {
+                usuario.setSenha(passwordEncoder.encode(dadosAtualizados.getSenha()));
+            }
+
+            return usuarioRepository.save(usuario);
+        });
+    }
+
+    // Exclui usuario respeitando a ordem das FKs: Historico -> Medicamento -> Agenda -> Usuario
     @Transactional
     public boolean deleteComValidacao(Long id, String senhaAtual) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findById(id);
         if (usuarioOpt.isEmpty()) return false;
 
         Usuario usuario = usuarioOpt.get();
-        if (!usuario.getSenha().equals(senhaAtual)) return false;
+        if (!senhaConfere(usuario, senhaAtual)) return false;
 
-        // 1. Busca todas as agendas do usuário
         var agendas = agendaRepository.findByUsuarioId(id);
 
-        // 2. Para cada agenda, deleta históricos e medicamentos
         for (var agenda : agendas) {
             historicoRepository.deleteByAgendaId(agenda.getId());
             medicamentoRepository.deleteByAgendaId(agenda.getId());
         }
 
-        // 3. Deleta as agendas
         agendaRepository.deleteAll(agendas);
-
-        // 4. Deleta o usuário
         usuarioRepository.deleteById(id);
         return true;
     }
@@ -82,21 +100,23 @@ public class UsuarioService {
 
     public Optional<Usuario> login(String email, String senha) {
         try {
-            System.out.println("Buscando usuário com email: " + email);
+            System.out.println("Buscando usuario com email: " + email);
             Optional<Usuario> usuarioExiste = usuarioRepository.findByEmail(email);
             if (usuarioExiste.isEmpty()) {
-                System.out.println("Usuário não encontrado com email: " + email);
+                System.out.println("Usuario nao encontrado com email: " + email);
                 return Optional.empty();
             }
-            Optional<Usuario> usuario = usuarioRepository.findByEmailAndSenha(email, senha);
-            if (usuario.isEmpty()) {
+
+            Usuario usuario = usuarioExiste.get();
+            if (!senhaConfere(usuario, senha)) {
                 System.out.println("Senha incorreta para o email: " + email);
-            } else {
-                System.out.println("Login bem-sucedido para: " + email);
+                return Optional.empty();
             }
-            return usuario;
+
+            System.out.println("Login bem-sucedido para: " + email);
+            return Optional.of(usuario);
         } catch (Exception e) {
-            System.err.println("Erro durante autenticação: " + e.getMessage());
+            System.err.println("Erro durante autenticacao: " + e.getMessage());
             e.printStackTrace();
             return Optional.empty();
         }
@@ -107,11 +127,32 @@ public class UsuarioService {
         if (usuarioOpt.isEmpty()) return false;
 
         Usuario usuario = usuarioOpt.get();
-        if (!usuario.getSenha().equals(senhaAtual)) return false;
+        if (!senhaConfere(usuario, senhaAtual)) return false;
 
         usuario.setNome(nome);
-        usuario.setSenha(novaSenha);
-        save(usuario);
+        if (novaSenha != null && !novaSenha.isBlank()) {
+            usuario.setSenha(passwordEncoder.encode(novaSenha));
+        }
+        usuarioRepository.save(usuario);
         return true;
+    }
+
+    private boolean senhaConfere(Usuario usuario, String senhaInformada) {
+        if (senhaInformada == null || usuario.getSenha() == null) return false;
+
+        if (isSenhaComHash(usuario.getSenha())) {
+            return passwordEncoder.matches(senhaInformada, usuario.getSenha());
+        }
+
+        boolean senhaLegadaConfere = usuario.getSenha().equals(senhaInformada);
+        if (senhaLegadaConfere) {
+            usuario.setSenha(passwordEncoder.encode(senhaInformada));
+            usuarioRepository.save(usuario);
+        }
+        return senhaLegadaConfere;
+    }
+
+    private boolean isSenhaComHash(String senha) {
+        return senha != null && senha.matches("^\\$2[aby]\\$\\d{2}\\$.{53}$");
     }
 }
