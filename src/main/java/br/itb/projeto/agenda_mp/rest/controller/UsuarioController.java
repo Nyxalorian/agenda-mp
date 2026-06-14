@@ -22,17 +22,27 @@ import br.itb.projeto.agenda_mp.service.UsuarioService;
 
 @RestController
 @RequestMapping("/api/usuarios")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
+@CrossOrigin(origins = {
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "https://pharmalife-81386.web.app",   // Firebase (produção)
+    "https://pharmalife-81386.firebaseapp.com" // Firebase (alternativo)
+})
 public class UsuarioController {
-    
+
     @GetMapping("/test")
     public ResponseEntity<String> test() {
         return ResponseEntity.ok("API está funcionando!");
     }
-    
+
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("OK");
+    }
+
     @Autowired
     private UsuarioService usuarioService;
-    
+
     @GetMapping
     public ResponseEntity<?> findAll() {
         try {
@@ -45,7 +55,7 @@ public class UsuarioController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao buscar usuários");
         }
     }
-    
+
     @GetMapping("/{id}")
     public ResponseEntity<?> findById(@PathVariable Long id) {
         try {
@@ -61,20 +71,19 @@ public class UsuarioController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno do servidor");
         }
     }
-    
+
     @PostMapping
     public ResponseEntity<?> create(@RequestBody Usuario usuario) {
         try {
             if (usuario.getNome() == null || usuario.getEmail() == null || usuario.getSenha() == null) {
                 return ResponseEntity.badRequest().body("Nome, email e senha são obrigatórios");
             }
-            
-            // Verificar se email já existe
+
             Optional<Usuario> usuarioExistente = usuarioService.findByEmail(usuario.getEmail());
             if (usuarioExistente.isPresent()) {
                 return ResponseEntity.badRequest().body("Email já está em uso");
             }
-            
+
             Usuario novoUsuario = usuarioService.save(usuario);
             return ResponseEntity.ok(novoUsuario);
         } catch (Exception e) {
@@ -83,14 +92,14 @@ public class UsuarioController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao criar usuário");
         }
     }
-    
+
     @PutMapping("/{id}")
     public ResponseEntity<Usuario> update(@PathVariable Long id, @RequestBody Usuario usuario) {
         return usuarioService.update(id, usuario)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
-    
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id, @RequestBody(required = false) java.util.Map<String, String> body) {
         String senhaAtual = body != null ? body.get("senhaAtual") : null;
@@ -105,21 +114,19 @@ public class UsuarioController {
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Senha incorreta ou usuário não encontrado");
     }
-    
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Usuario _usuario) {
         try {
             System.out.println("Tentativa de login para email: " + _usuario.getEmail());
 
-           
-            
-            if (_usuario.getEmail() == null || _usuario.getEmail().trim().isEmpty() || _usuario.getSenha() == null || _usuario.getSenha() .trim().isEmpty()) {
+            if (_usuario.getEmail() == null || _usuario.getEmail().trim().isEmpty() ||
+                _usuario.getSenha() == null || _usuario.getSenha().trim().isEmpty()) {
                 return ResponseEntity.badRequest().body("Email e senha são obrigatórios");
             }
-            
-             // Busncar no banco (Service)
-            Optional<Usuario> usuario = usuarioService.login(_usuario.getEmail().trim(), _usuario.getSenha() );
-            
+
+            Optional<Usuario> usuario = usuarioService.login(_usuario.getEmail().trim(), _usuario.getSenha());
+
             if (usuario.isPresent()) {
                 System.out.println("Login bem-sucedido para: " + _usuario.getEmail());
                 return ResponseEntity.ok(usuario.get());
@@ -133,7 +140,7 @@ public class UsuarioController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno do servidor");
         }
     }
-    
+
     @PutMapping("/{id}/profile")
     public ResponseEntity<String> updateProfile(@PathVariable Long id, @RequestBody UpdateProfileRequest request) {
         try {
