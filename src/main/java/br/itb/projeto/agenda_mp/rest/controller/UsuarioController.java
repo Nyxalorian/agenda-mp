@@ -25,8 +25,8 @@ import br.itb.projeto.agenda_mp.service.UsuarioService;
 @CrossOrigin(origins = {
     "http://localhost:3000",
     "http://localhost:5173",
-    "https://pharmalife-81386.web.app",   // Firebase (produção)
-    "https://pharmalife-81386.firebaseapp.com" // Firebase (alternativo)
+    "https://pharmalife-81306.web.app",   // Firebase (produção)
+    "https://pharmalife-81306.firebaseapp.com" // Firebase (alternativo)
 })
 public class UsuarioController {
 
