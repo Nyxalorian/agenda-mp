@@ -4,10 +4,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class AgendaMpApplication {	
+public class AgendaMpApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(AgendaMpApplication.class, args);
-	}
+    public static void main(String[] args) {
 
+        System.out.println("========== APP INICIANDO ==========");
+
+        SpringApplication.run(AgendaMpApplication.class, args);
+    }
 }
