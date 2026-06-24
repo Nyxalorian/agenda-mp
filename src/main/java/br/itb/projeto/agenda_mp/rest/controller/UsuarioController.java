@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseToken;
 
 import br.itb.projeto.agenda_mp.model.entity.Usuario;
 import br.itb.projeto.agenda_mp.rest.dto.UpdateProfileRequest;
@@ -142,17 +144,64 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}/profile")
-    public ResponseEntity<String> updateProfile(@PathVariable Long id, @RequestBody UpdateProfileRequest request) {
-        try {
-            boolean success = usuarioService.updateProfile(id, request.getNome(), request.getSenhaAtual(), request.getNovaSenha());
-            if (success) {
-                return ResponseEntity.ok("Perfil atualizado com sucesso!");
-            } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Senha atual incorreta ou usuário não encontrado");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno do servidor");
+public ResponseEntity<String> updateProfile(@PathVariable Long id, @RequestBody UpdateProfileRequest request) {
+    try {
+        boolean success = usuarioService.updateProfile(id, request.getNome(), request.getSenhaAtual(), request.getNovaSenha());
+        if (success) {
+            return ResponseEntity.ok("Perfil atualizado com sucesso!");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Senha atual incorreta ou usuário não encontrado");
         }
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno do servidor");
     }
 }
+
+@PostMapping("/google-login")
+public ResponseEntity<?> googleLogin(@RequestBody java.util.Map<String, String> body) {
+
+    try {
+
+        String token = body.get("token");
+
+        FirebaseToken decodedToken =
+                FirebaseAuth.getInstance().verifyIdToken(token);
+
+        String email = decodedToken.getEmail();
+        String nome = (String) decodedToken.getClaims().getOrDefault("name", "Usuário Google");
+
+        Optional<Usuario> usuarioExistente =
+                usuarioService.findByEmail(email);
+
+        Usuario usuario;
+
+        if (usuarioExistente.isPresent()) {
+
+            usuario = usuarioExistente.get();
+
+        } else {
+
+            usuario = new Usuario();
+            usuario.setNome(nome);
+            usuario.setEmail(email);
+
+            usuario.setIdade(0);
+            usuario.setComorbidade("");
+
+            usuario.setSenha(java.util.UUID.randomUUID().toString());
+
+            usuario = usuarioService.save(usuario);
+        }
+
+        return ResponseEntity.ok(usuario);
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body("Token Google inválido");
+    }
+}
+
+}
+    
