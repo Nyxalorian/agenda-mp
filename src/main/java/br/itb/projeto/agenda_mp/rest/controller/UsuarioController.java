@@ -165,6 +165,9 @@ public ResponseEntity<?> googleLogin(@RequestBody java.util.Map<String, String> 
 
         String token = body.get("token");
 
+        System.out.println("========== TOKEN RECEBIDO ==========");
+        System.out.println(token);
+
         FirebaseToken decodedToken =
                 FirebaseAuth.getInstance().verifyIdToken(token);
 
@@ -197,11 +200,15 @@ public ResponseEntity<?> googleLogin(@RequestBody java.util.Map<String, String> 
         return ResponseEntity.ok(usuario);
 
     } catch (Exception e) {
+
+        System.out.println("========== ERRO FIREBASE ==========");
         e.printStackTrace();
+
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body("Token Google inválido");
+                .body("ERRO: " + e.getMessage());
     }
 }
-
 }
+
+
     

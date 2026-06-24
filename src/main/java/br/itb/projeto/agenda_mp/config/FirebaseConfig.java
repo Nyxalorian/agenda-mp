@@ -1,6 +1,8 @@
 package br.itb.projeto.agenda_mp.config;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import org.springframework.context.annotation.Configuration;
 
@@ -20,15 +22,17 @@ public class FirebaseConfig {
 
         try {
 
-            InputStream serviceAccount =
-                    getClass().getClassLoader()
-                            .getResourceAsStream("firebase/pharmalife-firebase.json");
+            String credentials = System.getenv("FIREBASE_CREDENTIALS");
 
-            System.out.println("Arquivo encontrado? " + (serviceAccount != null));
+            System.out.println("Variável FIREBASE_CREDENTIALS encontrada? " + (credentials != null));
 
-            if (serviceAccount == null) {
-                throw new RuntimeException("Arquivo do Firebase não encontrado!");
+            if (credentials == null) {
+                throw new RuntimeException("Variável FIREBASE_CREDENTIALS não encontrada!");
             }
+
+            InputStream serviceAccount = new ByteArrayInputStream(
+                credentials.getBytes(StandardCharsets.UTF_8)
+            );
 
             FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
