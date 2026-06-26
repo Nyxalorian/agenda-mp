@@ -173,6 +173,7 @@ public ResponseEntity<?> googleLogin(@RequestBody java.util.Map<String, String> 
 
         String email = decodedToken.getEmail();
         String nome = (String) decodedToken.getClaims().getOrDefault("name", "Usuário Google");
+        String foto = (String) decodedToken.getClaims().get("picture");
 
         Optional<Usuario> usuarioExistente =
                 usuarioService.findByEmail(email);
@@ -181,21 +182,27 @@ public ResponseEntity<?> googleLogin(@RequestBody java.util.Map<String, String> 
 
         if (usuarioExistente.isPresent()) {
 
-            usuario = usuarioExistente.get();
+    usuario = usuarioExistente.get();
 
-        } else {
+    // Atualiza a foto
+    usuario.setFoto(foto);
 
-            usuario = new Usuario();
-            usuario.setNome(nome);
-            usuario.setEmail(email);
+    usuario = usuarioService.save(usuario);
 
-            usuario.setIdade(0);
-            usuario.setComorbidade("");
+} else {
 
-            usuario.setSenha(java.util.UUID.randomUUID().toString());
+    usuario = new Usuario();
+    usuario.setNome(nome);
+    usuario.setEmail(email);
+    usuario.setFoto(foto);
 
-            usuario = usuarioService.save(usuario);
-        }
+    usuario.setIdade(0);
+    usuario.setComorbidade("");
+
+    usuario.setSenha(java.util.UUID.randomUUID().toString());
+
+    usuario = usuarioService.save(usuario);
+}
 
         return ResponseEntity.ok(usuario);
 
