@@ -1,12 +1,16 @@
 package br.itb.projeto.agenda_mp.service;
 
 import java.time.LocalTime;
+import java.util.List;
+
+import jakarta.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import br.itb.projeto.agenda_mp.model.repository.AgendaRepository;
-import java.util.List;
+
 import br.itb.projeto.agenda_mp.model.entity.Agenda;
+import br.itb.projeto.agenda_mp.model.repository.AgendaRepository;
 
 @Service
 public class AgendadorNotificacaoService {
@@ -16,6 +20,11 @@ public class AgendadorNotificacaoService {
 
     @Autowired
     private NotificacaoService notificacaoService;
+
+    @PostConstruct
+    public void teste() {
+        System.out.println("SERVIÇO DO SCHEDULER CARREGADO");
+    }
 
     @Scheduled(cron = "0 * * * * *")
     public void verificarMedicamentos() {
@@ -30,10 +39,10 @@ public class AgendadorNotificacaoService {
         System.out.println("=================================");
 
         try {
-    List<Agenda> agendas = agendaRepository.findByHorario(agora);
-    System.out.println("Encontradas: " + agendas.size());
-} catch (Exception e) {
-    e.printStackTrace();
-}
+            List<Agenda> agendas = agendaRepository.findByHorario(agora);
+            System.out.println("Encontradas: " + agendas.size());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
