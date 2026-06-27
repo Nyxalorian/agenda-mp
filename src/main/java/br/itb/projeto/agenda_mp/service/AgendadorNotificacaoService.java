@@ -39,7 +39,7 @@ public class AgendadorNotificacaoService {
         System.out.println("=================================");
 
         try {
-            List<Agenda> agendas = agendaRepository.findByHorario(agora);
+            List<Agenda> agendas = agendaRepository.buscarPorHorario(agora);
             System.out.println("Encontradas: " + agendas.size());
         } catch (Exception e) {
             e.printStackTrace();
