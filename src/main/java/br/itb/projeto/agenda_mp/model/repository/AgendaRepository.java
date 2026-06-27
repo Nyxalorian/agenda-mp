@@ -16,5 +16,4 @@ public interface AgendaRepository extends JpaRepository<Agenda, Long> {
 
     @Query(value = "SELECT * FROM Agenda WHERE horario = :horario", nativeQuery = true)
     List<Agenda> buscarPorHorario(@Param("horario") LocalTime horario);
-
 }
