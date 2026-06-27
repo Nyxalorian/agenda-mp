@@ -17,26 +17,31 @@ public class NotificacaoController {
     private NotificacaoService notificacaoService;
 
     @PostMapping("/teste")
-    public ResponseEntity<?> teste(@RequestBody Map<String, String> body) {
+public ResponseEntity<?> teste(@RequestBody Map<String, String> body) {
 
-        try {
+    try {
 
-            String token = body.get("token");
+        String token = body.get("token");
 
-            String resposta = notificacaoService.enviar(
-                    token,
-                    "PharmaLife",
-                    "Teste de notificação 🚀");
+        System.out.println("==================================");
+        System.out.println("TOKEN RECEBIDO:");
+        System.out.println(token);
+        System.out.println("==================================");
 
-            return ResponseEntity.ok(resposta);
+        String resposta = notificacaoService.enviar(
+                token,
+                "PharmaLife",
+                "Teste de notificação 🚀");
 
-        } catch (Exception e) {
+        return ResponseEntity.ok(resposta);
 
-            e.printStackTrace();
+    } catch (Exception e) {
 
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(e.toString());
-        }
+        e.printStackTrace();
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(e.toString());
     }
+}
 }
