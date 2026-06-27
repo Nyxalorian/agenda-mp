@@ -33,7 +33,7 @@ public class Agenda {
     @Column(nullable = false, length = 100)
     private String observacoes;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "usuarios_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Usuario usuario;
