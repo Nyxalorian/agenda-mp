@@ -155,4 +155,13 @@ public class UsuarioService {
     private boolean isSenhaComHash(String senha) {
         return senha != null && senha.matches("^\\$2[aby]\\$\\d{2}\\$.{53}$");
     }
+    public void atualizarFcmToken(Long id, String token) {
+    Optional<Usuario> usuarioOpt = usuarioRepository.findById(id);
+
+    if (usuarioOpt.isPresent()) {
+        Usuario usuario = usuarioOpt.get();
+        usuario.setFcmToken(token);
+        usuarioRepository.save(usuario);
+    }
+}
 }

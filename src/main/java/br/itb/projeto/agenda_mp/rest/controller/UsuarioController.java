@@ -215,6 +215,24 @@ public ResponseEntity<?> googleLogin(@RequestBody java.util.Map<String, String> 
                 .body("ERRO: " + e.getMessage());
     }
 }
+    @PutMapping("/{id}/fcm-token")
+public ResponseEntity<?> atualizarFcmToken(
+        @PathVariable Long id,
+        @RequestBody java.util.Map<String, String> body) {
+
+    Optional<Usuario> usuarioOpt = usuarioService.findById(id);
+
+    if (usuarioOpt.isEmpty()) {
+        return ResponseEntity.notFound().build();
+    }
+
+    Usuario usuario = usuarioOpt.get();
+    usuario.setFcmToken(body.get("token"));
+
+    usuarioService.save(usuario);
+
+    return ResponseEntity.ok("Token salvo.");
+}
 }
 
 
