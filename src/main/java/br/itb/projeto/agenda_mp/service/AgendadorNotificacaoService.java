@@ -27,37 +27,65 @@ public class AgendadorNotificacaoService {
     }
 
     @Scheduled(cron = "0 * * * * *")
-public void verificarMedicamentos() {
+    public void verificarMedicamentos() {
 
-    LocalTime agora = LocalTime.now()
-            .withSecond(0)
-            .withNano(0);
+        LocalTime agora = LocalTime.now()
+                .withSecond(0)
+                .withNano(0);
 
-    System.out.println("=================================");
-    System.out.println("SCHEDULER RODANDO");
-    System.out.println("Verificando horário: " + agora);
-    System.out.println("=================================");
+        System.out.println("=================================");
+        System.out.println("SCHEDULER RODANDO");
+        System.out.println("Verificando horário: " + agora);
+        System.out.println("=================================");
 
-    try {
+        try {
 
-        List<Agenda> todas = agendaRepository.findAll();
+            List<Agenda> todas = agendaRepository.findAll();
 
-        System.out.println("Total agendas: " + todas.size());
+            System.out.println("Total agendas: " + todas.size());
 
-        for (Agenda agenda : todas) {
-            System.out.println(
-                "ID: " + agenda.getId() +
-                " | Horário banco: " + agenda.getHorario() +
-                " | Igual? " + agenda.getHorario().equals(agora)
-            );
+            for (Agenda agenda : todas) {
+                System.out.println(
+                        "ID: " + agenda.getId() +
+                        " | Horário banco: " + agenda.getHorario() +
+                        " | Igual? " + agenda.getHorario().equals(agora)
+                );
+            }
+
+            List<Agenda> agendas = todas.stream()
+                    .filter(a -> a.getHorario().equals(agora))
+                    .toList();
+
+            System.out.println("Encontradas: " + agendas.size());
+
+            for (Agenda agenda : agendas) {
+
+                System.out.println("Medicamento encontrado: " + agenda.getNome());
+
+                String token = agenda.getUsuario().getFcmToken();
+
+                if (token != null && !token.isBlank()) {
+
+                    try {
+
+                        notificacaoService.enviar(
+                                token,
+                                "Hora do medicamento!",
+                                "Está na hora de tomar " + agenda.getNome()
+                        );
+
+                        System.out.println("Notificação enviada!");
+
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                } else {
+                    System.out.println("Usuário sem token FCM.");
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        List<Agenda> agendas = agendaRepository.findByHorario(agora);
-
-        System.out.println("Encontradas: " + agendas.size());
-
-    } catch (Exception e) {
-        e.printStackTrace();
     }
-}
 }
