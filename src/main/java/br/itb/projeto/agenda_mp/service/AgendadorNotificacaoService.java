@@ -1,13 +1,11 @@
 package br.itb.projeto.agenda_mp.service;
 
 import java.time.LocalTime;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import br.itb.projeto.agenda_mp.model.entity.Agenda;
 import br.itb.projeto.agenda_mp.model.repository.AgendaRepository;
 
 @Service
@@ -26,11 +24,12 @@ public class AgendadorNotificacaoService {
                 .withSecond(0)
                 .withNano(0);
 
+        System.out.println("=================================");
+        System.out.println("SCHEDULER RODANDO");
         System.out.println("Verificando horário: " + agora);
+        System.out.println("=================================");
 
-        List<Agenda> agendas = agendaRepository.findByHorario(agora);
-
-        System.out.println("Encontradas: " + agendas.size());
-
+        // List<Agenda> agendas = agendaRepository.findByHorario(agora);
+        // System.out.println("Encontradas: " + agendas.size());
     }
 }
