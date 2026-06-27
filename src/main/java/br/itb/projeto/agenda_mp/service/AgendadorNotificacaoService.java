@@ -27,22 +27,36 @@ public class AgendadorNotificacaoService {
     }
 
     @Scheduled(cron = "0 * * * * *")
-    public void verificarMedicamentos() {
+public void verificarMedicamentos() {
 
-        LocalTime agora = LocalTime.now()
-                .withSecond(0)
-                .withNano(0);
+    LocalTime agora = LocalTime.now()
+            .withSecond(0)
+            .withNano(0);
 
-        System.out.println("=================================");
-        System.out.println("SCHEDULER RODANDO");
-        System.out.println("Verificando horário: " + agora);
-        System.out.println("=================================");
+    System.out.println("=================================");
+    System.out.println("SCHEDULER RODANDO");
+    System.out.println("Verificando horário: " + agora);
+    System.out.println("=================================");
 
-        try {
-            List<Agenda> agendas = agendaRepository.buscarPorHorario(agora);
-            System.out.println("Encontradas: " + agendas.size());
-        } catch (Exception e) {
-            e.printStackTrace();
+    try {
+
+        List<Agenda> todas = agendaRepository.findAll();
+
+        System.out.println("Total agendas: " + todas.size());
+
+        for (Agenda agenda : todas) {
+            System.out.println(
+                "ID: " + agenda.getId() +
+                " | Horário banco: " + agenda.getHorario() +
+                " | Igual? " + agenda.getHorario().equals(agora)
+            );
         }
+
+        List<Agenda> agendas = agendaRepository.findByHorario(agora);
+
+        System.out.println("Encontradas: " + agendas.size());
+
+    } catch (Exception e) {
+        e.printStackTrace();
     }
 }

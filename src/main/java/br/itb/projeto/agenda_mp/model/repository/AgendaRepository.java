@@ -14,10 +14,5 @@ public interface AgendaRepository extends JpaRepository<Agenda, Long> {
 
     List<Agenda> findByUsuarioId(Long usuarioId);
 
-    @Query(value = """
-    SELECT *
-    FROM Agenda
-    WHERE CAST(horario AS TIME) = CAST(:horario AS TIME)
-    """, nativeQuery = true)
-List<Agenda> buscarPorHorario(@Param("horario") LocalTime horario);
+    List<Agenda> findByHorario(LocalTime horario);
 }
