@@ -90,4 +90,15 @@ public class Usuario {
     public void setFoto(String foto) {
         this.foto = foto;
     }
+
+    @Column(length = 500)
+    private String fcmToken;
+
+    public String getFcmToken() {
+    return fcmToken;
+}
+
+public void setFcmToken(String fcmToken) {
+    this.fcmToken = fcmToken;
+}
 }
