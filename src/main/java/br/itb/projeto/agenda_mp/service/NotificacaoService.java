@@ -15,12 +15,8 @@ public class NotificacaoService {
 
             Message message = Message.builder()
                     .setToken(token)
-                    .setNotification(
-                            Notification.builder()
-                                    .setTitle(titulo)
-                                    .setBody(corpo)
-                                    .build())
-                    .setToken(token)
+                    .putData("title", titulo)
+                    .putData("body", corpo)
                     .build();
 
             String resposta = FirebaseMessaging.getInstance().send(message);
