@@ -2,6 +2,7 @@ package br.itb.projeto.agenda_mp.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "Usuarios")
@@ -14,8 +15,8 @@ public class Usuario {
     @Column(nullable = false, length = 100)
     private String nome;
 
-    @Column(nullable = false)
-    private Integer idade;
+    @Column(name = "data_nascimento", nullable = false)
+    private LocalDate dataNascimento;
 
     @Column(length = 100)
     private String comorbidade;
@@ -51,14 +52,13 @@ public class Usuario {
         this.nome = nome;
     }
 
-    public Integer getIdade() {
-        return idade;
-    }
+    public LocalDate getDataNascimento() {
+    return dataNascimento;
+}
 
-    public void setIdade(Integer idade) {
-        this.idade = idade;
-    }
-
+public void setDataNascimento(LocalDate dataNascimento) {
+    this.dataNascimento = dataNascimento;
+}
     public String getComorbidade() {
         return comorbidade;
     }

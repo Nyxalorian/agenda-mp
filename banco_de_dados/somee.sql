@@ -2,7 +2,7 @@
 (
    id INT IDENTITY,
    nome VARCHAR(100) NOT NULL,
-   idade INT NOT NULL,
+   data_nascimento DATE NOT NULL,
    comorbidade VARCHAR(100) NULL,
    email VARCHAR(100) NOT NULL,
    senha VARCHAR(100) NOT NULL,

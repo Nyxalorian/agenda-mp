@@ -58,7 +58,7 @@ public class UsuarioService {
         return usuarioRepository.findById(id).map(usuario -> {
             usuario.setNome(dadosAtualizados.getNome());
             usuario.setEmail(dadosAtualizados.getEmail());
-            usuario.setIdade(dadosAtualizados.getIdade());
+            usuario.setDataNascimento(dadosAtualizados.getDataNascimento());
             usuario.setComorbidade(dadosAtualizados.getComorbidade());
 
             if (dadosAtualizados.getSenha() != null && !dadosAtualizados.getSenha().isBlank()) {

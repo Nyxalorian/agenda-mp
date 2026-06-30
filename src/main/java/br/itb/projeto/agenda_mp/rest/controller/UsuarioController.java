@@ -22,6 +22,8 @@ import br.itb.projeto.agenda_mp.model.entity.Usuario;
 import br.itb.projeto.agenda_mp.rest.dto.UpdateProfileRequest;
 import br.itb.projeto.agenda_mp.service.UsuarioService;
 
+import java.time.LocalDate;
+
 @RestController
 @RequestMapping("/api/usuarios")
 @CrossOrigin(origins = {
@@ -196,8 +198,7 @@ public ResponseEntity<?> googleLogin(@RequestBody java.util.Map<String, String> 
     usuario.setEmail(email);
     usuario.setFoto(foto);
 
-    usuario.setIdade(0);
-    usuario.setComorbidade("");
+usuario.setDataNascimento(LocalDate.of(2000, 1, 1));    usuario.setComorbidade("");
 
     usuario.setSenha(java.util.UUID.randomUUID().toString());
 
