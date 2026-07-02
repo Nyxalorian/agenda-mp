@@ -11,11 +11,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class UsuarioService {
+
+    private static final LocalDate ONBOARDING_PENDING_DATE = LocalDate.of(1900, 1, 1);
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -155,6 +158,34 @@ public class UsuarioService {
     private boolean isSenhaComHash(String senha) {
         return senha != null && senha.matches("^\\$2[aby]\\$\\d{2}\\$.{53}$");
     }
+
+    public boolean perfilCompleto(Usuario usuario) {
+        return usuario != null
+                && usuario.getNome() != null
+                && !usuario.getNome().isBlank()
+                && usuario.getDataNascimento() != null
+                && !ONBOARDING_PENDING_DATE.equals(usuario.getDataNascimento())
+                && usuario.getComorbidade() != null
+                && !usuario.getComorbidade().isBlank();
+    }
+
+    public Optional<Usuario> finalizarOnboarding(Long id, String nome, String dataNascimento, String comorbidade) {
+        if (nome == null || nome.isBlank() || dataNascimento == null || dataNascimento.isBlank()) {
+            return Optional.empty();
+        }
+
+        return usuarioRepository.findById(id).map(usuario -> {
+            usuario.setNome(nome.trim());
+            usuario.setDataNascimento(LocalDate.parse(dataNascimento));
+            usuario.setComorbidade(
+                    comorbidade == null || comorbidade.isBlank()
+                            ? "Nao possuo comorbidades"
+                            : comorbidade.trim()
+            );
+            return usuarioRepository.save(usuario);
+        });
+    }
+
     public void atualizarFcmToken(Long id, String token) {
     Optional<Usuario> usuarioOpt = usuarioRepository.findById(id);
 

@@ -1,6 +1,7 @@
 package br.itb.projeto.agenda_mp.rest.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,8 @@ import java.time.LocalDate;
     "https://pharmalife-81306.firebaseapp.com" // Firebase (alternativo)
 })
 public class UsuarioController {
+
+    private static final LocalDate ONBOARDING_PENDING_DATE = LocalDate.of(1900, 1, 1);
 
     @GetMapping("/test")
     public ResponseEntity<String> test() {
@@ -82,6 +85,9 @@ public class UsuarioController {
             if (usuario.getNome() == null || usuario.getEmail() == null || usuario.getSenha() == null) {
                 return ResponseEntity.badRequest().body("Nome, email e senha são obrigatórios");
             }
+
+            usuario.setDataNascimento(ONBOARDING_PENDING_DATE);
+            usuario.setComorbidade("");
 
             Optional<Usuario> usuarioExistente = usuarioService.findByEmail(usuario.getEmail());
             if (usuarioExistente.isPresent()) {
@@ -198,7 +204,7 @@ public ResponseEntity<?> googleLogin(@RequestBody java.util.Map<String, String> 
     usuario.setEmail(email);
     usuario.setFoto(foto);
 
-usuario.setDataNascimento(LocalDate.of(2000, 1, 1));    usuario.setComorbidade("");
+usuario.setDataNascimento(ONBOARDING_PENDING_DATE);    usuario.setComorbidade("");
 
     usuario.setSenha(java.util.UUID.randomUUID().toString());
 
@@ -216,6 +222,39 @@ usuario.setDataNascimento(LocalDate.of(2000, 1, 1));    usuario.setComorbidade("
                 .body("ERRO: " + e.getMessage());
     }
 }
+
+    @GetMapping("/{id}/profile-status")
+public ResponseEntity<?> getProfileStatus(@PathVariable Long id) {
+    Optional<Usuario> usuarioOpt = usuarioService.findById(id);
+
+    if (usuarioOpt.isEmpty()) {
+        return ResponseEntity.notFound().build();
+    }
+
+    boolean perfilCompleto = usuarioService.perfilCompleto(usuarioOpt.get());
+    return ResponseEntity.ok(Map.of("perfilCompleto", perfilCompleto));
+}
+
+    @PutMapping("/{id}/onboarding")
+public ResponseEntity<?> finalizarOnboarding(@PathVariable Long id, @RequestBody Map<String, String> body) {
+    try {
+        String nome = body.get("nome");
+        String dataNascimento = body.get("dataNascimento");
+        String comorbidade = body.get("comorbidade");
+
+        Optional<Usuario> usuarioAtualizado = usuarioService.finalizarOnboarding(id, nome, dataNascimento, comorbidade);
+
+        if (usuarioAtualizado.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Dados obrigatorios do onboarding invalidos");
+        }
+
+        return ResponseEntity.ok(usuarioAtualizado.get());
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao finalizar onboarding");
+    }
+}
+
     @PutMapping("/{id}/fcm-token")
 public ResponseEntity<?> atualizarFcmToken(
         @PathVariable Long id,
