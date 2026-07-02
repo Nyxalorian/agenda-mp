@@ -31,7 +31,13 @@ public class Historico {
     @Column(name = "data_confirmacao")
     private LocalDateTime dataConfirmacao;
 
-    // Status: PENDENTE, CONFIRMADO, IGNORADO
+    @Column(name = "motivo_ignorado", length = 200)
+    private String motivoIgnorado;
+
+    @Column(name = "data_hora_ignorado")
+    private LocalDateTime dataHoraIgnorado;
+
+    // Status: PENDENTE, TOMADO, PERDIDO, IGNORADO
     @Column(nullable = false, length = 20, columnDefinition = "VARCHAR(20) DEFAULT 'PENDENTE'")
     private String status = "PENDENTE";
 
@@ -64,6 +70,12 @@ public class Historico {
 
     public LocalDateTime getDataConfirmacao() { return dataConfirmacao; }
     public void setDataConfirmacao(LocalDateTime dataConfirmacao) { this.dataConfirmacao = dataConfirmacao; }
+
+    public String getMotivoIgnorado() { return motivoIgnorado; }
+    public void setMotivoIgnorado(String motivoIgnorado) { this.motivoIgnorado = motivoIgnorado; }
+
+    public LocalDateTime getDataHoraIgnorado() { return dataHoraIgnorado; }
+    public void setDataHoraIgnorado(LocalDateTime dataHoraIgnorado) { this.dataHoraIgnorado = dataHoraIgnorado; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }

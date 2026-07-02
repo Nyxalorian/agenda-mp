@@ -6,6 +6,7 @@ public class HistoricoRequest {
     private String observacoes;
     private String horario; // aceita "HH:mm" ou "HH:mm:ss"
     private String status;
+    private String motivoIgnorado;
 
     public HistoricoRequest() {}
 
@@ -23,4 +24,7 @@ public class HistoricoRequest {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public String getMotivoIgnorado() { return motivoIgnorado; }
+    public void setMotivoIgnorado(String motivoIgnorado) { this.motivoIgnorado = motivoIgnorado; }
 }

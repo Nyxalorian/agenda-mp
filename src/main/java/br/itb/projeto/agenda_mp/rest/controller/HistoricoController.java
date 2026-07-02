@@ -10,6 +10,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -59,6 +60,8 @@ public class HistoricoController {
             } else {
                 historico.setHorario(LocalTime.now());
             }
+            historico.setStatus(request.getStatus());
+            historico.setMotivoIgnorado(request.getMotivoIgnorado());
             return ResponseEntity.ok(historicoService.registrar(historico, agendaId, medicamentoId));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -77,9 +80,10 @@ public class HistoricoController {
 
     // Registra que o medicamento foi ignorado
     @PatchMapping("/historico/{id}/ignorar")
-    public ResponseEntity<?> ignorar(@PathVariable Long id) {
+    public ResponseEntity<?> ignorar(@PathVariable Long id, @RequestBody(required = false) Map<String, String> body) {
         try {
-            return ResponseEntity.ok(historicoService.ignorarUso(id));
+            String motivo = body != null ? body.get("motivoIgnorado") : null;
+            return ResponseEntity.ok(historicoService.ignorarUso(id, motivo));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

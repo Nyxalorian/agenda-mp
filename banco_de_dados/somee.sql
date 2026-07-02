@@ -58,6 +58,8 @@ CREATE TABLE Historico
    observacoes VARCHAR(100) NOT NULL,
    horario TIME NOT NULL,
    data_confirmacao DATETIME2 NULL,
+   motivo_ignorado VARCHAR(200) NULL,
+   data_hora_ignorado DATETIME2 NULL,
    status VARCHAR(20) NOT NULL DEFAULT 'PENDENTE',
    medicamento_id INT NULL,
    agenda_id INT NULL,

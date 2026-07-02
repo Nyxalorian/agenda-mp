@@ -48,7 +48,7 @@ public class HistoricoService {
                 .orElseThrow(() -> new IllegalArgumentException("Medicamento não encontrado: " + medicamentoId));
         historico.setAgenda(agenda);
         historico.setMedicamento(medicamento);
-        historico.setStatus("PENDENTE");
+        historico.setStatus(normalizarStatus(historico.getStatus()));
         // Garante horario não nulo
         if (historico.getHorario() == null) {
             historico.setHorario(LocalTime.now());
@@ -64,17 +64,34 @@ public class HistoricoService {
     public Historico confirmarUso(Long historicoId) {
         Historico historico = historicoRepository.findById(historicoId)
                 .orElseThrow(() -> new IllegalArgumentException("Histórico não encontrado: " + historicoId));
-        historico.setStatus("CONFIRMADO");
+        historico.setStatus("TOMADO");
         historico.setDataConfirmacao(LocalDateTime.now());
         return historicoRepository.save(historico);
     }
 
     // Registra que o medicamento foi ignorado no horário
-    public Historico ignorarUso(Long historicoId) {
+    public Historico ignorarUso(Long historicoId, String motivoIgnorado) {
         Historico historico = historicoRepository.findById(historicoId)
                 .orElseThrow(() -> new IllegalArgumentException("Histórico não encontrado: " + historicoId));
         historico.setStatus("IGNORADO");
+        historico.setMotivoIgnorado(
+                motivoIgnorado == null || motivoIgnorado.isBlank()
+                        ? "Outro motivo"
+                        : motivoIgnorado.trim()
+        );
+        historico.setDataHoraIgnorado(LocalDateTime.now());
         return historicoRepository.save(historico);
+    }
+
+    private String normalizarStatus(String status) {
+        if (status == null || status.isBlank()) return "PENDENTE";
+
+        return switch (status.trim().toUpperCase()) {
+            case "TOMADO", "CONFIRMADO" -> "TOMADO";
+            case "PERDIDO" -> "PERDIDO";
+            case "IGNORADO" -> "IGNORADO";
+            default -> "PENDENTE";
+        };
     }
 
     public void deleteById(Long id) {
