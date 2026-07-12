@@ -273,6 +273,21 @@ public ResponseEntity<?> atualizarFcmToken(
 
     return ResponseEntity.ok("Token salvo.");
 }
+
+    @PutMapping("/{id}/tipo-notificacao")
+public ResponseEntity<?> atualizarTipoNotificacao(
+        @PathVariable Long id,
+        @RequestBody java.util.Map<String, String> body) {
+
+    Optional<Usuario> usuarioAtualizado =
+            usuarioService.atualizarTipoNotificacao(id, body.get("tipoNotificacao"));
+
+    if (usuarioAtualizado.isEmpty()) {
+        return ResponseEntity.notFound().build();
+    }
+
+    return ResponseEntity.ok(usuarioAtualizado.get());
+}
 }
 
 

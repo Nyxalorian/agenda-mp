@@ -32,6 +32,9 @@ public class Usuario {
     @Column(length = 500)
     private String foto;
 
+    @Column(name = "tipo_notificacao", nullable = false, length = 20)
+    private String tipoNotificacao = "sistema";
+
     public Usuario() {}
 
     // Getters e Setters
@@ -89,6 +92,14 @@ public void setDataNascimento(LocalDate dataNascimento) {
 
     public void setFoto(String foto) {
         this.foto = foto;
+    }
+
+    public String getTipoNotificacao() {
+        return tipoNotificacao;
+    }
+
+    public void setTipoNotificacao(String tipoNotificacao) {
+        this.tipoNotificacao = tipoNotificacao;
     }
 
     @Column(length = 500)

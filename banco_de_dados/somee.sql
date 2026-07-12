@@ -6,6 +6,7 @@
    comorbidade VARCHAR(100) NULL,
    email VARCHAR(100) NOT NULL,
    senha VARCHAR(100) NOT NULL,
+   tipo_notificacao VARCHAR(20) NOT NULL DEFAULT 'sistema',
    PRIMARY KEY (id)
 );
 GO

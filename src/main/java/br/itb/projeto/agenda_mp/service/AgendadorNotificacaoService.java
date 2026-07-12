@@ -62,6 +62,12 @@ public class AgendadorNotificacaoService {
 
                 System.out.println("Medicamento encontrado: " + agenda.getNome());
 
+                String tipoNotificacao = agenda.getUsuario().getTipoNotificacao();
+                if ("browser".equalsIgnoreCase(tipoNotificacao)) {
+                    System.out.println("Usuario usa notificacao pelo browser. Push FCM ignorado.");
+                    continue;
+                }
+
                 String token = agenda.getUsuario().getFcmToken();
 
                 if (token != null && !token.isBlank()) {

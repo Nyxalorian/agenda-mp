@@ -19,6 +19,8 @@ import java.util.Optional;
 public class UsuarioService {
 
     private static final LocalDate ONBOARDING_PENDING_DATE = LocalDate.of(1900, 1, 1);
+    private static final String TIPO_NOTIFICACAO_SISTEMA = "sistema";
+    private static final String TIPO_NOTIFICACAO_BROWSER = "browser";
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -51,6 +53,8 @@ public class UsuarioService {
     }
 
     public Usuario save(Usuario usuario) {
+        usuario.setTipoNotificacao(normalizarTipoNotificacao(usuario.getTipoNotificacao()));
+
         if (usuario.getSenha() != null && !usuario.getSenha().isBlank() && !isSenhaComHash(usuario.getSenha())) {
             usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
         }
@@ -63,6 +67,10 @@ public class UsuarioService {
             usuario.setEmail(dadosAtualizados.getEmail());
             usuario.setDataNascimento(dadosAtualizados.getDataNascimento());
             usuario.setComorbidade(dadosAtualizados.getComorbidade());
+
+            if (dadosAtualizados.getTipoNotificacao() != null) {
+                usuario.setTipoNotificacao(normalizarTipoNotificacao(dadosAtualizados.getTipoNotificacao()));
+            }
 
             if (dadosAtualizados.getSenha() != null && !dadosAtualizados.getSenha().isBlank()) {
                 usuario.setSenha(passwordEncoder.encode(dadosAtualizados.getSenha()));
@@ -159,6 +167,14 @@ public class UsuarioService {
         return senha != null && senha.matches("^\\$2[aby]\\$\\d{2}\\$.{53}$");
     }
 
+    public String normalizarTipoNotificacao(String tipoNotificacao) {
+        if (TIPO_NOTIFICACAO_BROWSER.equalsIgnoreCase(String.valueOf(tipoNotificacao))) {
+            return TIPO_NOTIFICACAO_BROWSER;
+        }
+
+        return TIPO_NOTIFICACAO_SISTEMA;
+    }
+
     public boolean perfilCompleto(Usuario usuario) {
         return usuario != null
                 && usuario.getNome() != null
@@ -182,6 +198,19 @@ public class UsuarioService {
                             ? "Nao possuo comorbidades"
                             : comorbidade.trim()
             );
+            return usuarioRepository.save(usuario);
+        });
+    }
+
+    public Optional<Usuario> atualizarTipoNotificacao(Long id, String tipoNotificacao) {
+        return usuarioRepository.findById(id).map(usuario -> {
+            String tipoNormalizado = normalizarTipoNotificacao(tipoNotificacao);
+            usuario.setTipoNotificacao(tipoNormalizado);
+
+            if (TIPO_NOTIFICACAO_BROWSER.equals(tipoNormalizado)) {
+                usuario.setFcmToken(null);
+            }
+
             return usuarioRepository.save(usuario);
         });
     }
